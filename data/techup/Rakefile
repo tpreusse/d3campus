@@ -1,0 +1,77 @@
+# encoding: UTF-8
+
+require 'json'
+# require 'active_support/all'
+require 'nokogiri'
+require 'open-uri'
+require 'twitter'
+
+Twitter.configure do |config|
+  config.consumer_key = ENV['CONSUMER_KEY']
+  config.consumer_secret = ENV['CONSUMER_SECRET']
+  config.oauth_token = ENV['OAUTH_TOKEN']
+  config.oauth_token_secret = ENV['OAUTH_TOKEN_SECRET']
+end
+
+namespace :techup do
+  desc "creates json file of participants"
+  task :participants do
+    puts "start processing"
+
+    doc = Nokogiri::HTML(open('http://techup.ch/1026/campus-bern-d3-js-data-driven-documents'))
+
+    participants = []
+    doc.css('.attendees a').each do |link|
+      participants << link.content
+    end
+
+    twitter_info = Twitter.users(participants)
+
+    participants_extended = []
+    twitter_info.each do |twitter_user|
+      participants_extended << {
+        handle: twitter_user.handle,
+        avatar: twitter_user.profile_image_url(:bigger),
+        name: twitter_user.name,
+        tweets: twitter_user.tweet_count,
+        followers: twitter_user.followers_count
+      }
+    end
+
+    File.open("participants.json", 'wb') do |file|
+      file.write participants_extended.to_json
+    end
+
+    puts "done"
+  end
+
+  desc "creates json file of past meetups"
+  task :meetups do
+    # http://techup.ch/past?page=x
+    puts "start processing"
+
+    cities = {}
+    (1..20).each do |page|
+      doc = Nokogiri::HTML(open("http://techup.ch/past?page=#{page}"))
+      puts "page #{page}"
+
+      doc.css('.meetup .city').each do |link|
+        city_name = link.content
+        cities[city_name] = (cities[city_name] || 0) + 1
+      end
+    end
+
+    cities_json = []
+    cities.sort_by {|key, value| value * -1}.each do |key, value|
+      cities_json << {
+        name: key,
+        meetups: value
+      }
+    end
+    File.open("cities.json", 'wb') do |file|
+      file.write cities_json.to_json
+    end
+
+    puts "done"
+  end
+end

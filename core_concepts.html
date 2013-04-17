@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+    <head>
+        <link type="text/css" rel="stylesheet" href="style.css">
+	    <title></title>
+        <style>
+pre {
+    margin:5px 0;
+}
+        </style>
+    </head>
+    <body>
+
+        <div id="body">
+            <div id="header">
+                <h1>core concepts</h1>
+                <ul style="">
+                    <li>select &amp; selectAll
+                        <pre>var svg = d3.select("svg");
+var circles = svg.selectAll("circle");
+                        </pre>
+                    </li>
+                    <li>bind data
+                        <pre>circles.data([32, 57, 112]);</pre>
+                    </li>
+                    <li>enter &amp; exit
+                        <pre>circles.enter().append("circle");
+circles.exit().remove();</pre>
+                    </li>
+                    <li>dynamic properties
+                        <pre>circles.attr("r", function(datum, index) {
+    return datum * 2;
+});</pre>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </body>
+</html>
