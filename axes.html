@@ -16,7 +16,7 @@
         </div>
     <script>
         d3.json(
-            'http://localhost:8000/data/techup/cities.json', 
+            'data/techup/cities.json', 
             function(data){
                 data = _.sortBy(data, function(d){return d.meetups});
 
